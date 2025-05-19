@@ -1,0 +1,692 @@
+# Product Requirements Document (PRD)
+
+## BOOGEY ADVISOR: Electronic Music Event Recommendation App
+
+### Project Overview
+
+BOOGEY ADVISOR is a mobile-optimized web application that helps users discover electronic music events based on their music preferences. The app matches users with club events and DJs that align with their taste in electronic music, focusing on providing personalized recommendations for the electronic music scene.
+
+### Technology Stack
+
+- **Frontend**: Next.js with TypeScript
+- **Database**: Supabase
+- **Deployment**: Vercel
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS with custom theme
+
+### Target Audience
+
+- Electronic music enthusiasts looking to discover events
+- Club-goers who want personalized event recommendations
+- Users who may not know specific DJs but know what music they enjoy
+- Primary focus on users in major electronic music hubs (Berlin initially)
+
+### Core Features
+
+1. **Music Preference Onboarding**
+   - Two-path approach to establishing user taste profiles
+   - Manual artist/genre selection
+   - Interactive music quiz with audio samples
+
+2. **Location-Based Event Discovery**
+   - City selection for localized recommendations
+   - Event listings with match indicators
+
+3. **Artist/DJ Profiles**
+   - Detailed information about performing artists
+   - Audio previews of their music
+   - External links to platforms like SoundCloud
+   - Event details and ticket purchasing options
+
+4. **Personalized Recommendations**
+   - Multi-dimensional match scoring based on user preferences
+   - "Great Match" highlighting for high-confidence recommendations
+
+### User Flows
+
+#### 1. Onboarding Flow
+
+1. **Music Preference Selection**
+   - User is presented with two options:
+     - "I KNOW DJ'S I LIKE" - For users familiar with specific artists
+     - "DO A QUICK MUSIC QUIZ" - For users who prefer to discover by listening
+
+2. **If "I KNOW DJ'S I LIKE" is selected:**
+   - User is prompted to enter artist names they enjoy
+   - System builds preference profile based on these selections
+
+3. **If "DO A QUICK MUSIC QUIZ" is selected:**
+   - User is presented with audio samples from different electronic music styles
+   - For each sample, user rates: "LOVE IT", "IT'S OKAY", or "SKIP"
+   - System builds preference profile based on these ratings
+
+4. **Location Selection**
+   - User selects their city from a dropdown (Berlin as default/initial city)
+
+5. **Loading/Processing**
+   - System processes preferences and searches for matching events
+   - User sees "SEARCHING FOR EVENTS..." screen with option to proceed
+
+#### 2. Event Discovery Flow
+
+1. **Artist Recommendations**
+   - User sees a list of recommended artists with events
+   - Each recommendation shows:
+     - Artist name
+     - Event date
+     - Genre tags
+     - Match quality indicator ("GREAT MATCH" for high-confidence matches)
+     - Play button for audio preview
+
+2. **Artist/Event Details**
+   - User taps on an artist card to view detailed information
+   - Detailed view includes:
+     - Extended artist information
+     - Genre classifications
+     - SoundCloud integration
+     - Event details
+     - Ticket purchasing option
+
+### Screen-by-Screen Requirements
+
+#### Screen 1: Music Preference Question
+- Header: "BOOGEY ADVISOR"
+- Step indicator: "01"
+- Question: "WHAT MUSIC ARE YOU INTO?"
+- Two option cards:
+  - White card: "I KNOW DJ'S I LIKE" with description
+  - Blue card: "DO A QUICK MUSIC QUIZ" with "RECOMMENDED" tag and description
+- Blue waveform visualization
+- Each card should be tappable to select that option
+
+#### Screen 2: Music Rating
+- Header: "BOOGEY ADVISOR"
+- Step indicator: "02"
+- Question: "HOW DO YOU FEEL ABOUT THIS?"
+- Audio player with:
+  - Artist/track name
+  - Genre tags
+  - Play/pause button
+- Rating buttons: "IT'S OKAY" and "LOVE IT"
+- "SKIP" option
+- Progress indicator showing quiz progress
+- Audio should play automatically when screen loads
+
+#### Screen 3: Location Selection
+- Header: "BOOGEY ADVISOR"
+- Step indicator: "03"
+- Question: "WHICH CITY ARE YOU FROM?"
+- Dropdown selector for cities (default: BERLIN)
+- Blue waveform visualization
+- Dropdown should expand to show city options when tapped
+
+#### Screen 4: Loading Screen
+- Header: "BOOGEY ADVISOR"
+- "SEARCHING FOR EVENTS..." message
+- Blue waveform visualization
+- "SHOW EVENTS I'D LIKE" button
+- Button should be tappable to proceed to recommendations
+
+#### Screen 5: Artist Recommendations
+- Header: "BA" with city selector in top right
+- Title: "ARTISTS YOU'D LIKE"
+- List of artist cards containing:
+  - Date
+  - Artist name
+  - Genre tags
+  - "GREAT MATCH" tag for high-confidence matches
+  - Play button for audio preview
+- Each card should be tappable to view artist details
+- Play button should play audio sample without navigating away
+
+#### Screen 6: Artist Detail
+- Header: "BA" with city name in top right
+- Title: "ARTISTS YOU'D LIKE"
+- Artist card with:
+  - Date
+  - Artist name
+  - Genre tags
+  - "GREAT MATCH" tag if applicable
+  - Play button
+- "Listen on Soundcloud" option
+- Artist description
+- Event details
+- "GET TICKETS" button
+- Play button should play/pause audio sample
+- "GET TICKETS" should link to ticket purchasing page
+
+### Technical Requirements
+
+#### Enhanced Data Structure
+
+The app will use a sophisticated data structure to accurately model electronic music preferences and artists. This structure enables nuanced matching beyond simple genre tags.
+
+##### 1. Multi-dimensional Music Attributes
+
+Both artists and user preferences are modeled using eight continuous dimensions (0.0-1.0 scale):
+
+1. **Energy**: From ambient/downtempo (0.0) to high-energy/fast (1.0)
+2. **Experimental**: From mainstream/accessible (0.0) to experimental/avant-garde (1.0)
+3. **Melodic**: From purely rhythmic/percussive (0.0) to highly melodic (1.0)
+4. **Dark**: From light/uplifting (0.0) to dark/intense (1.0)
+5. **Organic**: From digital/synthetic (0.0) to organic/acoustic (1.0)
+6. **Vocal**: From purely instrumental (0.0) to vocal-focused (1.0)
+7. **Depth**: From surface-level/simple (0.0) to deep/complex (1.0)
+8. **Classic**: From modern/contemporary (0.0) to classic/traditional (1.0)
+
+##### 2. Weighted Genre and Scene Associations
+
+Rather than binary genre assignments, both artists and user preferences use weighted associations:
+
+- An artist might be 0.8 Techno, 0.6 Minimal, and 0.3 House
+- A user might prefer 0.9 Techno, 0.7 Ambient, and 0.4 House
+
+##### 3. Scene-Based Labeling
+
+Beyond musical characteristics, the system incorporates "scenes" - cultural movements or communities with distinct sounds:
+
+- Berlin Techno
+- UK Garage
+- Detroit Techno
+- Ibiza House
+
+##### 4. Mood-Based Labeling
+
+Moods capture the emotional or functional aspects of music:
+
+- Energetic
+- Hypnotic
+- Euphoric
+- Dark
+- Introspective
+- Peak-time
+
+##### 5. Matching Algorithm
+
+The recommendation system uses a multi-factor scoring approach:
+
+- Direct dimension matching (comparing 8-dimensional vectors)
+- Weighted genre overlap
+- Scene compatibility
+- Mood alignment
+- Confidence scoring for "Great Match" designation
+
+#### Supabase Implementation
+
+1. **Database Tables**:
+
+   ```typescript
+   // User profile
+   interface User {
+     id: string;
+     email: string;
+     created_at: string;
+     updated_at: string;
+     display_name?: string;
+     city: string;
+     onboarding_completed: boolean;
+     onboarding_method: 'manual' | 'quiz' | null;
+     last_active: string;
+   }
+
+   // Enhanced User Preferences
+   interface UserPreference {
+     id: string;
+     user_id: string;
+     // Core music dimensions (0.0-1.0 scale)
+     dimensions: {
+       energy: number;          // Low energy to high energy
+       experimental: number;    // Mainstream to experimental
+       melodic: number;         // Rhythmic to melodic
+       dark: number;            // Light to dark
+       organic: number;         // Digital to organic
+       vocal: number;           // Instrumental to vocal
+       depth: number;           // Surface-level to deep
+       classic: number;         // Modern to classic
+     };
+     
+     // Weighted genre preferences
+     genre_weights: {
+       [genre_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     // Weighted scene preferences
+     scene_weights: {
+       [scene_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     // Explicit artist preferences
+     artist_preferences: {
+       [artist_id: string]: {
+         rating: number;        // -1.0 (dislike) to 1.0 (love)
+         source: 'manual' | 'quiz' | 'derived';
+         timestamp: string;
+       };
+     };
+     
+     // Mood preferences (situational)
+     mood_preferences: {
+       [mood_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     created_at: string;
+     updated_at: string;
+   }
+
+   // Enhanced Artist Model
+   interface Artist {
+     id: string;
+     name: string;
+     aliases?: string[];
+     
+     // Core music dimensions (0.0-1.0 scale)
+     dimensions: {
+       energy: number;
+       experimental: number;
+       melodic: number;
+       dark: number;
+       organic: number;
+       vocal: number;
+       depth: number;
+       classic: number;
+     };
+     
+     // Weighted genre associations
+     genre_weights: {
+       [genre_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     // Weighted scene associations
+     scene_weights: {
+       [scene_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     // Mood associations
+     mood_weights: {
+       [mood_id: string]: number;  // 0.0-1.0 scale
+     };
+     
+     // Similar artists (pre-computed)
+     similar_artists: {
+       [artist_id: string]: number;  // Similarity score 0.0-1.0
+     };
+     
+     description: string;
+     bio?: string;
+     image_url?: string;
+     soundcloud_url?: string;
+     spotify_id?: string;
+     resident_advisor_id?: string;
+     
+     created_at: string;
+     updated_at: string;
+   }
+
+   // Genre Taxonomy
+   interface Genre {
+     id: string;
+     name: string;
+     parent_id?: string;
+     description?: string;
+     
+     // Related genres with weights
+     related_genres: {
+       [genre_id: string]: number;  // Relatedness score 0.0-1.0
+     };
+     
+     created_at: string;
+     updated_at: string;
+   }
+
+   // Scene Taxonomy
+   interface Scene {
+     id: string;
+     name: string;
+     description?: string;
+     
+     // Geographic associations
+     locations: {
+       [city_id: string]: number;  // Relevance score 0.0-1.0
+     };
+     
+     created_at: string;
+     updated_at: string;
+   }
+
+   // Enhanced Event Model
+   interface Event {
+     id: string;
+     name: string;
+     description?: string;
+     date: string;
+     start_time: string;
+     end_time?: string;
+     
+     venue: {
+       id: string;
+       name: string;
+       address?: string;
+       city: string;
+       country: string;
+       latitude?: number;
+       longitude?: number;
+     };
+     
+     // Lineup with time slots
+     lineup: {
+       [artist_id: string]: {
+         start_time?: string;
+         end_time?: string;
+         room?: string;
+         is_headliner: boolean;
+       };
+     };
+     
+     // Aggregated dimensions (calculated from artists)
+     aggregated_dimensions?: {
+       energy: number;
+       experimental: number;
+       melodic: number;
+       dark: number;
+       organic: number;
+       vocal: number;
+       depth: number;
+       classic: number;
+     };
+     
+     // Aggregated genres (calculated from artists)
+     aggregated_genres?: {
+       [genre_id: string]: number;
+     };
+     
+     ticket_url?: string;
+     price_range?: string;
+     currency?: string;
+     min_price?: number;
+     max_price?: number;
+     
+     image_url?: string;
+     resident_advisor_id?: string;
+     
+     created_at: string;
+     updated_at: string;
+   }
+   ```
+
+2. **Authentication**:
+   - Email-based authentication
+   - Anonymous browsing allowed
+   - Saved preferences require account
+
+#### Next.js Implementation
+
+1. **Page Structure**:
+   - `/`: Landing/onboarding page
+   - `/quiz`: Music preference quiz
+   - `/location`: City selection
+   - `/loading`: Processing screen
+   - `/recommendations`: Artist/event listings
+   - `/artist/[id]`: Artist detail page
+
+2. **State Management**:
+   - React Context for user preferences
+   - Local storage for persisting session state
+   - Supabase for persistent data
+
+3. **Responsive Design**:
+   - Mobile-first approach
+   - Optimized for phone screens
+   - Functional on desktop but prioritizing mobile experience
+
+4. **Performance Considerations**:
+   - Next.js static generation where possible
+   - Dynamic routes for artist and event pages
+   - Audio file optimization for quick playback
+   - Lazy loading for images and non-critical content
+
+### System Architecture
+
+BOOGEY ADVISOR consists of four primary components that work together to deliver personalized electronic music event recommendations:
+
+1. **Event Scraper Service**
+   - Automated system that collects real-time event data from multiple sources
+   - Features:
+     - Web scraping from club websites, promoter pages, and platforms like Resident Advisor
+     - Structured data extraction for event details, lineups, venues, and dates
+     - Periodic scheduling to maintain up-to-date event listings
+     - Data cleaning and normalization for consistent information
+   - Technical considerations:
+     - Headless browser automation for JavaScript-rendered content
+     - Rate limiting and respectful crawling practices
+     - Error handling for website changes and outages
+     - ETL pipeline for transforming scraped data to the application's data model
+
+2. **DJ/Artist Labelling System**
+   - Process for evaluating and categorizing artists according to the multi-dimensional framework
+   - Features:
+     - Audio analysis to extract musical features
+     - Genre and scene classification algorithms
+     - Artist relationship mapping
+     - Data enrichment from external sources (SoundCloud, Spotify, etc.)
+   - Technical considerations:
+     - Semi-automated labelling with human verification
+     - Confidence scoring for attribute assignments
+     - Version control for artist profiles as their sound evolves
+     - Training data management for machine learning components
+
+3. **Recommendation Engine**
+   - Core matching algorithm that connects user preferences with artists and events
+   - Features:
+     - Multi-dimensional vector similarity calculations
+     - Weighted genre and scene matching
+     - Confidence-based recommendation scoring
+     - "Great Match" determination logic
+   - Technical considerations:
+     - Efficient vector calculations for real-time recommendations
+     - Caching strategies for frequently accessed data
+     - Progressive refinement based on user feedback
+     - Fallback recommendations for users with limited preference data
+
+4. **User Interface**
+   - Web application frontend that users interact with directly
+   - Features:
+     - Onboarding flows for preference capture
+     - Event discovery and browsing
+     - Artist profiles and audio previews
+     - Responsive, mobile-optimized design
+   - Technical considerations:
+     - Next.js with React Server Components for optimal performance
+     - Client-side state management for preference data
+     - Audio playback optimization
+     - Progressive enhancement for varied device capabilities
+
+#### Component Interaction
+
+These components interact in the following ways:
+
+1. The **Event Scraper Service** populates the database with raw event data
+2. The **DJ/Artist Labelling System** enriches artist data with dimensional attributes
+3. The **Recommendation Engine** uses the enriched data to generate matches based on user preferences
+4. The **User Interface** collects user preferences and displays personalized recommendations
+
+This modular architecture allows for independent development and scaling of each component while maintaining a cohesive user experience.
+
+### Existing Implementation Status
+
+The User Interface component has been initially implemented as a Next.js application, available at https://github.com/daumantaskodina/v0-event-advisor. This implementation includes:
+
+1. **Core UI Screens**
+   - Onboarding with preference selection options
+   - Music quiz with audio sample rating
+   - City selection
+   - Loading screen
+   - Results/recommendations screen
+
+2. **Technical Features**
+   - Next.js 15 with React 19
+   - TypeScript implementation
+   - Tailwind CSS for styling
+   - Responsive, mobile-first design
+   - Framer Motion animations for smooth transitions
+   - Shadcn UI components (Radix UI primitives)
+
+3. **Design Implementation**
+   - Follows the black/white/blue color scheme specified in the design requirements
+   - Implements the typography and UI element guidelines
+   - Includes waveform visualizations and UI animations
+
+This existing implementation serves as the foundation for the user-facing component of the system. The remaining components (Event Scraper Service, DJ/Artist Labelling System, and Recommendation Engine) need to be developed to complete the full system architecture.
+
+### Design Requirements
+
+1. **Color Scheme**:
+   - Primary background: Black (#000000)
+   - Primary accent: Royal blue (#0000FF)
+   - Text: White (#FFFFFF) on dark backgrounds, Black (#000000) on light backgrounds
+   - UI elements: White, black, and blue
+   - Highlight: "GREAT MATCH" in blue background
+
+2. **Typography**:
+   - App name: "BOOGEY ADVISOR" in all caps, white, sans-serif
+   - Step numbers: Large blue numerals (01, 02, 03)
+   - Headers: Bold, all caps, white
+   - Button text: All caps
+   - Artist names: Bold, all caps
+   - Genre tags: Regular weight, sentence case with hyphens
+
+3. **UI Elements**:
+   - Waveform visualizations (blue)
+   - Play buttons (circular, blue)
+   - Cards (white with black text)
+   - Dropdown selectors (dark gray with white text)
+   - Action buttons (blue with white text, black with white text)
+
+### MVP Scope
+
+For the initial release, the following features are in scope:
+
+1. Complete onboarding flow with both preference selection methods
+2. Berlin as the only supported city
+3. Artist recommendations based on user preferences
+4. Basic artist profiles with genre information
+5. External links to SoundCloud and ticket purchasing
+6. Audio previews for artists
+
+The following features are out of scope for the MVP:
+
+1. User accounts and saved preferences (anonymous sessions only)
+2. Multiple cities and location-based filtering
+3. Social sharing features
+4. Push notifications
+5. Calendar integration
+6. Ticket purchasing within the app
+
+### Data Requirements
+
+For the MVP, the app will use mock data stored in Supabase:
+
+1. **Artist Data**:
+   - 30-50 electronic music artists
+   - Multi-dimensional attributes (energy, experimental, melodic, etc.)
+   - Weighted genre associations
+   - Scene and mood tags
+   - Sample tracks for the quiz
+   - SoundCloud links
+
+2. **Event Data**:
+   - 20-30 upcoming events in Berlin
+   - Venue information
+   - Artist lineups
+   - Dates and times
+   - Ticket links
+   - Aggregated musical dimensions
+
+3. **Taxonomy Data**:
+   - 20-30 electronic music genres with relationships
+   - 10-15 scenes with geographic associations
+   - 10-15 moods with typical dimension ranges
+
+### User Preference Acquisition
+
+The enhanced data structure supports both preference acquisition methods:
+
+1. **Manual Selection**:
+   - Users select artists they like
+   - System infers dimension preferences and genre weights
+   - Confidence starts low but increases with more selections
+
+2. **Music Quiz**:
+   - Audio samples are pre-labeled with dimensions and genres
+   - User ratings adjust their preference vectors
+   - System can target specific dimensions to improve confidence
+
+### Testing Requirements
+
+1. **Functional Testing**:
+   - All user flows should be tested end-to-end
+   - Audio playback should work on all supported browsers
+   - Preference selection should result in appropriate recommendations
+
+2. **Compatibility Testing**:
+   - Mobile browsers: Chrome, Safari, Firefox
+   - Desktop browsers: Chrome, Firefox, Edge, Safari
+
+3. **Performance Testing**:
+   - Initial load time under 3 seconds
+   - Audio playback should start within 1 second
+   - Navigation between screens should be smooth
+
+### Deployment
+
+The application will be deployed on Vercel with the following considerations:
+
+1. **Environment Setup**:
+   - Development, staging, and production environments
+   - Environment variables for Supabase credentials
+
+2. **CI/CD**:
+   - Automated deployments from GitHub
+   - Preview deployments for pull requests
+   - Production deployments from main branch
+
+3. **Monitoring**:
+   - Vercel Analytics for performance monitoring
+   - Error tracking with Sentry
+
+### Success Metrics
+
+The success of the MVP will be measured by:
+
+1. User engagement with the onboarding process (completion rate)
+2. Time spent exploring recommendations
+3. Audio sample play rate
+4. Click-through rate to external ticket links
+5. Return visitor rate
+
+### Future Enhancements
+
+After the MVP, the following enhancements are planned:
+
+1. User accounts with saved preferences
+2. Additional cities and locations
+3. More sophisticated recommendation algorithm
+4. Integration with music streaming services (Spotify, Apple Music)
+5. Social sharing features
+6. Push notifications for upcoming events
+7. In-app ticket purchasing
+8. Collaborative filtering for recommendations
+9. Temporal preferences (time of day, day of week)
+10. Feedback loop to improve artist labeling
+
+### Appendix: Screen Mockups Reference
+
+The implementation should follow the provided screen designs:
+
+1. Screen 1: Music Preference Question
+2. Screen 2: Music Rating
+3. Screen 3: Location Selection
+4. Screen 4: Loading Screen
+5. Screen 5: Artist Recommendations
+6. Screen 6: Artist Detail
+
+All screens should maintain the black background, blue accents, and bold typography as shown in the designs.
